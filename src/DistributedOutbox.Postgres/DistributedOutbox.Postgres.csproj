@@ -1,0 +1,77 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>netcoreapp3.1</TargetFramework>
+        <LangVersion>9.0</LangVersion>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\DistributedOutbox\DistributedOutbox.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="IsExternalInit" Version="1.0.1">
+        <PrivateAssets>all</PrivateAssets>
+        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      </PackageReference>
+      <PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.0.7" />
+      <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="5.0.7" />
+      <PackageReference Include="System.Linq.Async" Version="5.0.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <EmbeddedResource Include="Queries\GetNextEventIdQuery.sql" />
+      <EmbeddedResource Include="Queries\SelectElderEventsBySequenceNameQuery.sql" />
+      <EmbeddedResource Include="Queries\SelectElderNonSequentialEventsQuery.sql" />
+      <EmbeddedResource Include="Queries\SelectSequenceNamesQuery.sql" />
+      <None Remove="Queries\MarkEventsSentQuery.sql" />
+      <None Remove="Queries\AddEventsQuery.sql" />
+      <EmbeddedResource Include="Queries\AddEventsQuery.sql" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Compile Update="Queries\SelectElderEventsBySequenceNameQuery.gen.cs">
+        <DependentUpon>SelectElderEventsBySequenceNameQuery.sql</DependentUpon>
+      </Compile>
+      <Compile Update="Queries\SelectElderEventsBySequenceName.cs">
+        <DependentUpon>SelectElderEventsBySequenceNameQuery.sql</DependentUpon>
+      </Compile>
+      <Compile Update="Queries\SelectElderNonSequentialEvents.cs">
+        <DependentUpon>SelectElderNonSequentialEventsQuery.sql</DependentUpon>
+      </Compile>
+      <Compile Update="Queries\SelectElderNonSequentialEventsQuery.gen.cs">
+        <DependentUpon>SelectElderNonSequentialEventsQuery.sql</DependentUpon>
+      </Compile>
+      <Compile Update="Queries\SelectSequenceNames.cs">
+        <DependentUpon>SelectSequenceNamesQuery.sql</DependentUpon>
+      </Compile>
+      <Compile Update="Queries\SelectSequenceNamesQuery.gen.cs">
+        <DependentUpon>SelectSequenceNamesQuery.sql</DependentUpon>
+      </Compile>
+      <Compile Update="Queries\UpdateStatusWithMetadataQuery.gen.cs">
+        <DependentUpon>UpdateStatusWithMetadataQuery.sql</DependentUpon>
+      </Compile>
+      <Compile Update="Queries\UpdateStatusWithMetadataQuery.cs">
+        <DependentUpon>UpdateStatusWithMetadataQuery.sql</DependentUpon>
+      </Compile>
+      <Compile Update="Queries\AddEventsQuery.gen.cs">
+        <DependentUpon>AddEventsQuery.sql</DependentUpon>
+      </Compile>
+      <Compile Update="Queries\AddEventsQuery.cs">
+        <DependentUpon>AddEventsQuery.sql</DependentUpon>
+      </Compile>
+      <Compile Update="Queries\GetNextEventIdQuery.cs">
+        <DependentUpon>GetNextEventIdQuery.sql</DependentUpon>
+      </Compile>
+      <Compile Update="Queries\GetNextEventIdQuery.gen.cs">
+        <DependentUpon>GetNextEventIdQuery.sql</DependentUpon>
+      </Compile>
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Remove="Queries\UpdateStatusWithMetadataQuery.sql" />
+      <EmbeddedResource Include="Queries\UpdateStatusWithMetadataQuery.sql" />
+    </ItemGroup>
+
+</Project>

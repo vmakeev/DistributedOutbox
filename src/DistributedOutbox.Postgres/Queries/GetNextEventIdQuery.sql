@@ -1,0 +1,1 @@
+SELECT nextval('"{0}.OutboxEventIds"')
