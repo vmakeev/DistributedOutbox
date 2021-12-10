@@ -24,7 +24,7 @@ namespace DistributedOutbox.Kafka
         /// <inheritdoc />
         public async Task<IWorkingSet> ProcessAsync(IWorkingSet workingSet, CancellationToken cancellationToken)
         {
-            foreach (IOutboxEvent outboxEvent in workingSet.Events)
+            foreach (var outboxEvent in workingSet.Events)
             {
                 try
                 {

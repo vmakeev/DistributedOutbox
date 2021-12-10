@@ -10,7 +10,7 @@ namespace DistributedOutbox.Postgres
 
         public EventTargetsProvider(IEnumerable<IEventTypeToTargetsMap> maps)
         {
-            foreach (IEventTypeToTargetsMap map in maps)
+            foreach (var map in maps)
             {
                 if (_dictionary.ContainsKey(map.EventType))
                 {

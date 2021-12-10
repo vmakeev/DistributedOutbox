@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.Common;
 using System.Linq;
 using System.Text.Json;
 using System.Threading;
@@ -41,7 +42,7 @@ namespace DistributedOutbox.Postgres
                     table,
                     parallelLimit,
                     cancellationToken);
-                
+
                 if (parallelWorkingSet is not null)
                 {
                     workingSets.Add(parallelWorkingSet);
@@ -82,7 +83,7 @@ namespace DistributedOutbox.Postgres
             }
             catch
             {
-                foreach (IWorkingSet workingSet in workingSets)
+                foreach (var workingSet in workingSets)
                 {
                     await workingSet.DisposeAsync();
                 }
@@ -112,16 +113,36 @@ namespace DistributedOutbox.Postgres
             int limit,
             CancellationToken cancellationToken)
         {
-            var connection = await _connectionProvider.GetDbConnectionAsync(cancellationToken);
-            var transaction = await connection.BeginTransactionAsync(cancellationToken);
+            DbConnection? connection = null;
+            DbTransaction? transaction = null;
 
-            var parallelEvents = await new SelectElderNonSequentialEventsQuery(schema, table)
-                                       .GetAsync(connection, limit, cancellationToken)
-                                       .Select(postgresOutboxEvent => postgresOutboxEvent.ToPostgresOutboxEvent())
-                                       .ToListAsync(cancellationToken: cancellationToken);
+            try
+            {
+                connection = await _connectionProvider.GetDbConnectionAsync(cancellationToken);
+                transaction = await connection.BeginTransactionAsync(cancellationToken);
 
-            var parallelWorkingSet = new PostgresWorkingSet(parallelEvents, transaction);
-            return parallelWorkingSet;
+                var parallelEvents = await new SelectElderNonSequentialEventsQuery(schema, table)
+                                           .GetAsync(connection, limit, cancellationToken)
+                                           .Select(postgresOutboxEvent => postgresOutboxEvent.ToPostgresOutboxEvent())
+                                           .ToListAsync(cancellationToken: cancellationToken);
+
+                var parallelWorkingSet = new ParallelPostgresWorkingSet(parallelEvents, transaction);
+                return parallelWorkingSet;
+            }
+            catch
+            {
+                if (transaction is not null)
+                {
+                    await transaction.DisposeAsync();
+                }
+
+                if (connection is not null)
+                {
+                    await connection.DisposeAsync();
+                }
+
+                throw;
+            }
         }
 
         private async Task<IPostgresWorkingSet?> GetSequentialWorkingSetAsync(
@@ -131,25 +152,49 @@ namespace DistributedOutbox.Postgres
             string sequenceName,
             CancellationToken cancellationToken)
         {
-            var connection = await _connectionProvider.GetDbConnectionAsync(cancellationToken);
-            var transaction = await connection.BeginTransactionAsync(cancellationToken);
+            DbConnection? connection = null;
+            DbTransaction? transaction = null;
 
             try
             {
+                connection = await _connectionProvider.GetDbConnectionAsync(cancellationToken);
+                transaction = await connection.BeginTransactionAsync(cancellationToken);
+
                 var sequentialEvents = await new SelectElderEventsBySequenceNameQuery(schema, table)
                                              .GetAsync(connection, sequenceName, limit, cancellationToken)
                                              .Select(postgresOutboxEvent => postgresOutboxEvent.ToOrderedPostgresOutboxEvent())
                                              .ToListAsync(cancellationToken: cancellationToken);
 
-                return new PostgresWorkingSet(sequentialEvents, transaction);
+                return new SequentialPostgresWorkingSet(sequentialEvents, transaction);
             }
             // Штатная ситуация: кто-то другой сейчас читает события по текущей последовательности
             catch (PostgresException ex) when (ex.SqlState == PostgresErrorCodes.LockNotAvailable)
             {
-                await transaction.DisposeAsync();
-                await connection.DisposeAsync();
+                if (transaction is not null)
+                {
+                    await transaction.DisposeAsync();
+                }
+
+                if (connection is not null)
+                {
+                    await connection.DisposeAsync();
+                }
 
                 return null;
+            }
+            catch
+            {
+                if (transaction is not null)
+                {
+                    await transaction.DisposeAsync();
+                }
+
+                if (connection is not null)
+                {
+                    await connection.DisposeAsync();
+                }
+
+                throw;
             }
         }
 
@@ -203,10 +248,10 @@ namespace DistributedOutbox.Postgres
 
             var updateStatusWithMetadataQuery = new UpdateStatusWithMetadataQuery(schema, table);
 
-            foreach (IPostgresOutboxEvent outboxEvent in workingSet.Events)
+            foreach (var outboxEvent in workingSet.Events)
             {
-                string metadata = JsonSerializer.Serialize(outboxEvent.Metadata);
-                string status = outboxEvent.Status.ToString("G");
+                var metadata = JsonSerializer.Serialize(outboxEvent.Metadata);
+                var status = outboxEvent.Status.ToString("G");
 
                 await updateStatusWithMetadataQuery.UpdateAsync(
                     workingSet.DbConnection,

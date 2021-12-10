@@ -14,7 +14,7 @@ namespace DistributedOutbox.Postgres
         /// События, входящие в рабочий набор
         /// </summary>
         public new IReadOnlyList<IPostgresOutboxEvent> Events { get; }
-        
+
         /// <summary>
         /// Выполняет подтверждение транзакции
         /// </summary>
@@ -31,7 +31,7 @@ namespace DistributedOutbox.Postgres
         /// Используемое подключение к БД
         /// </summary>
         DbConnection DbConnection { get; }
-        
+
         /// <summary>
         /// Статус рабочего набора
         /// </summary>

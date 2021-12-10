@@ -18,7 +18,7 @@ namespace DistributedOutbox.Postgres.EFIntegration
         private readonly SemaphoreSlim _activeTransactionAccessSemaphore = new(1, 1);
         private readonly TDbContext _context;
 
-        private DbContextAttachedTransaction<TDbContext>? _activeTransaction;
+        private DbContextTransactionManager<TDbContext>? _activeTransaction;
 
         public DbContextAttachedDatabaseUnitOfWork(TDbContext context)
         {
@@ -97,7 +97,7 @@ namespace DistributedOutbox.Postgres.EFIntegration
             {
                 EnsureHasNoTransactionInProgress();
 
-                _activeTransaction = new DbContextAttachedTransaction<TDbContext>(_context, _actions);
+                _activeTransaction = new DbContextTransactionManager<TDbContext>(_context, _actions);
                 try
                 {
                     _activeTransaction.Initialize();

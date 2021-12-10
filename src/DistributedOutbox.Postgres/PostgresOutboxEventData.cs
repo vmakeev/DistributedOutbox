@@ -8,10 +8,12 @@ namespace DistributedOutbox.Postgres
         public PostgresOutboxEventData(
             string eventKey,
             string eventType,
+            IOutboxEventMetadata metadata,
             object payload)
         {
             EventKey = eventKey;
             EventType = eventType;
+            Metadata = metadata;
             SequenceName = null;
             EventDate = DateTime.UtcNow;
             Payload = payload;
@@ -21,10 +23,12 @@ namespace DistributedOutbox.Postgres
             string eventKey,
             string eventType,
             string sequenceName,
+            IOutboxEventMetadata metadata,
             object payload)
         {
             EventKey = eventKey;
             EventType = eventType;
+            Metadata = metadata;
             SequenceName = sequenceName;
             EventDate = DateTime.UtcNow;
             Payload = payload;
@@ -41,6 +45,9 @@ namespace DistributedOutbox.Postgres
 
         /// <inheritdoc />
         public DateTime EventDate { get; }
+
+        /// <inheritdoc />
+        public IOutboxEventMetadata Metadata { get; set; }
 
         /// <inheritdoc />
         public object Payload { get; }

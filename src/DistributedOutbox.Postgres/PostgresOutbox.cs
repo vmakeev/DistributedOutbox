@@ -10,6 +10,7 @@ using Microsoft.Extensions.Options;
 
 namespace DistributedOutbox.Postgres
 {
+    /// <inheritdoc />
     internal class PostgresOutbox : IOutbox
     {
         private readonly AddEventsQuery _addEventsQuery;
@@ -65,7 +66,7 @@ namespace DistributedOutbox.Postgres
                 Date = data.EventDate,
                 Key = data.EventKey,
                 Targets = JsonSerializer.Serialize(_eventTargetsProvider.GetTargets(data.EventType)),
-                Metadata = JsonSerializer.Serialize(PostgresOutboxEventMetadata.Empty),
+                Metadata = JsonSerializer.Serialize(data.Metadata),
                 Payload = JsonSerializer.Serialize(data.Payload),
                 Status = EventStatus.New.ToString("G"),
                 Type = data.EventType,

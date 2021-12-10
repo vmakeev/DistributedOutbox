@@ -27,7 +27,7 @@ namespace DistributedOutbox.Kafka
         {
             var publishTasks = new List<Task>();
 
-            foreach (IOutboxEvent outboxEvent in workingSet.Events)
+            foreach (var outboxEvent in workingSet.Events)
             {
                 publishTasks.Add(PublishEventAsync(outboxEvent, cancellationToken));
             }

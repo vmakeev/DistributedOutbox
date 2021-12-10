@@ -9,7 +9,7 @@ namespace DistributedOutbox.Postgres
     /// <summary>
     /// Рабочий набор, снабженный информацией о транзакции
     /// </summary>
-    internal sealed class PostgresWorkingSet : IPostgresWorkingSet
+    internal abstract class PostgresWorkingSet : IPostgresWorkingSet
     {
         private bool _isDisposed;
         private bool _isTransactionFinished;
@@ -19,8 +19,8 @@ namespace DistributedOutbox.Postgres
 
         public DbConnection DbConnection => _transaction.Connection ?? throw new InvalidOperationException("Can not obtain connection from transaction");
 
-        public PostgresWorkingSet(IReadOnlyList<IPostgresOutboxEvent> events,
-                                  DbTransaction transaction)
+        protected PostgresWorkingSet(IReadOnlyList<IPostgresOutboxEvent> events,
+                                     DbTransaction transaction)
         {
             _events = events;
             _transaction = transaction;

@@ -56,7 +56,7 @@ namespace DistributedOutbox.AspNetCore
             }
             finally
             {
-                foreach (IWorkingSet workingSet in workingSets)
+                foreach (var workingSet in workingSets)
                 {
                     await workingSet.DisposeAsync();
                 }
@@ -65,10 +65,8 @@ namespace DistributedOutbox.AspNetCore
 
         private IDictionary<Task, IWorkingSet> StartWorkingSetsProcessing(IReadOnlyCollection<IWorkingSet> workingSets, CancellationToken cancellationToken)
         {
-            // если в рабочем наборе есть хотя бы одно событие, для которого важна очередность,
-            // то весь рабочий набор будет обрабатываться последовательно
-            var parallelSets = workingSets.Where(workingSet => !workingSet.Events.OfType<IOrderedOutboxEvent>().Any());
-            var sequentialSets = workingSets.Where(workingSet => workingSet.Events.OfType<IOrderedOutboxEvent>().Any());
+            var sequentialSets = workingSets.Where(workingSet => workingSet is ISequentialWorkingSet);
+            var parallelSets = workingSets.Where(workingSet => workingSet is not ISequentialWorkingSet);
 
             var parallelSetsTasks = parallelSets
                 .Select(
@@ -91,7 +89,7 @@ namespace DistributedOutbox.AspNetCore
                     ));
 
             var tasksDictionary = new Dictionary<Task, IWorkingSet>();
-            foreach ((Task task, IWorkingSet workingSet) in parallelSetsTasks.Concat(sequentialSetsTasks))
+            foreach ((Task task, var workingSet) in parallelSetsTasks.Concat(sequentialSetsTasks))
             {
                 tasksDictionary.Add(task, workingSet);
             }

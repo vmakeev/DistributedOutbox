@@ -12,10 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage;
 namespace DistributedOutbox.Postgres.EFIntegration
 {
     /// <summary>
-    /// 
+    /// Обработчик транзакции, получающий её из активного DbContext
     /// </summary>
     /// <typeparam name="TDbContext"></typeparam>
-    internal sealed class DbContextAttachedTransaction<TDbContext> : IAsyncDisposable
+    internal sealed class DbContextTransactionManager<TDbContext> : IAsyncDisposable
         where TDbContext : DbContext
     {
         private readonly TDbContext _context;
@@ -26,7 +26,7 @@ namespace DistributedOutbox.Postgres.EFIntegration
 
         private DbConnection? _connection;
 
-        public DbContextAttachedTransaction(TDbContext context, IEnumerable<Func<DbConnection, Task>> actions)
+        public DbContextTransactionManager(TDbContext context, IEnumerable<Func<DbConnection, Task>> actions)
         {
             _context = context;
             _actions = actions.ToArray();
