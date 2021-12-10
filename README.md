@@ -51,6 +51,7 @@ public class Foo
         var event1 = new PostgresOutboxEventData(
             eventKey: "event1Key",
             eventType: "event1Type",
+            metadata: PostgresOutboxEventMetadata.Empty,
             payload: new SomeJsonSerializablePayloadObject()
         );
         
@@ -59,6 +60,7 @@ public class Foo
             eventKey: "event2Key",
             eventType: "event2Type",
             sequenceName: "event2SequenceName",
+            metadata: PostgresOutboxEventMetadata.Empty,
             payload: new SomeJsonSerializablePayloadObject()
         );
 
