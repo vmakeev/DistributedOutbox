@@ -14,7 +14,7 @@ namespace DistributedOutbox.Postgres
         /// <returns>Результат преобразования</returns>
         public static IPostgresOutboxEvent ToPostgresOutboxEvent(this PostgresOutboxEventRaw source)
         {
-            return source.SequenceName is null
+            return string.IsNullOrEmpty(source.SequenceName)
                 ? new PostgresOutboxEvent(source)
                 : new OrderedPostgresOutboxEvent(source);
         }
@@ -26,9 +26,9 @@ namespace DistributedOutbox.Postgres
         /// <returns>Результат преобразования</returns>
         public static IOrderedPostgresOutboxEvent ToOrderedPostgresOutboxEvent(this PostgresOutboxEventRaw source)
         {
-            if (source.SequenceName is null)
+            if (string.IsNullOrEmpty(source.SequenceName))
             {
-                throw new ArgumentNullException($"{nameof(PostgresOutboxEventRaw.SequenceName)} can not be null.", nameof(source));
+                throw new ArgumentException($"{nameof(PostgresOutboxEventRaw.SequenceName)} can not be null or empty.", nameof(source.SequenceName));
             }
 
             return new OrderedPostgresOutboxEvent(source);

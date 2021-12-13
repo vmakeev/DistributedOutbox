@@ -11,7 +11,7 @@ namespace DistributedOutbox.Postgres
         {
             if (string.IsNullOrEmpty(source.SequenceName))
             {
-                throw new ArgumentException($"{nameof(SequenceName)} can not be null or empty.");
+                throw new ArgumentException($"{nameof(SequenceName)} can not be null or empty.", nameof(SequenceName));
             }
 
             SequenceName = source.SequenceName;

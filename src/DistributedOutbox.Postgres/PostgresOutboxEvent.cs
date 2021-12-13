@@ -19,7 +19,7 @@ namespace DistributedOutbox.Postgres
             Metadata = string.IsNullOrEmpty(source.Metadata)
                 ? new PostgresOutboxEventMetadata()
                 : JsonSerializer.Deserialize<PostgresOutboxEventMetadata>(source.Metadata) ?? new PostgresOutboxEventMetadata();
-            Status = Enum.Parse<EventStatus>(source.Status);
+            Status = Enum.Parse<EventStatus>(source.Status, true);
             Payload = source.Payload;
         }
 
@@ -63,7 +63,7 @@ namespace DistributedOutbox.Postgres
 
                 case EventStatus.Declined:
                 default:
-                    throw new ArgumentException($"Can not mark event as {nameof(EventStatus.Sent)} due to current status: {Status:G}");
+                    throw new InvalidOperationException($"Can not mark event as {nameof(EventStatus.Sent)} due to current status: {Status:G}");
             }
         }
 
@@ -80,7 +80,7 @@ namespace DistributedOutbox.Postgres
                 case EventStatus.Sent:
                 case EventStatus.Declined:
                 default:
-                    throw new ArgumentException($"Can not mark event as {nameof(EventStatus.Failed)} due to current status: {Status:G}");
+                    throw new InvalidOperationException($"Can not mark event as {nameof(EventStatus.Failed)} due to current status: {Status:G}");
             }
 
             Metadata[MetadataKeys.LastFailureReason] = reason;
@@ -99,7 +99,7 @@ namespace DistributedOutbox.Postgres
 
                 case EventStatus.Sent:
                 default:
-                    throw new ArgumentException($"Can not mark event as {nameof(EventStatus.Declined)} due to current status: {Status:G}");
+                    throw new InvalidOperationException($"Can not mark event as {nameof(EventStatus.Declined)} due to current status: {Status:G}");
             }
 
             Metadata[MetadataKeys.LastFailureReason] = reason;

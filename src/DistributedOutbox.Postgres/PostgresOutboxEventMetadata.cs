@@ -3,7 +3,7 @@
 namespace DistributedOutbox.Postgres
 {
     /// <inheritdoc cref="IOutboxEventMetadata"/>
-    public class PostgresOutboxEventMetadata : Dictionary<string, object?>, IOutboxEventMetadata
+    public class PostgresOutboxEventMetadata : Dictionary<string, string?>, IOutboxEventMetadata
     {
         /// <summary>
         /// Пустой набор метаданных

@@ -79,7 +79,7 @@ namespace DistributedOutbox.Postgres
         {
             if (_isDisposed)
             {
-                throw new ObjectDisposedException(nameof(PostgresWorkingSet));
+                throw new ObjectDisposedException(GetType().Name);
             }
         }
     }

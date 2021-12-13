@@ -5,7 +5,7 @@ namespace DistributedOutbox
     /// <summary>
     /// Метаданные события
     /// </summary>
-    public interface IOutboxEventMetadata : IDictionary<string, object?>
+    public interface IOutboxEventMetadata : IDictionary<string, string?>
     {
     }
 }
