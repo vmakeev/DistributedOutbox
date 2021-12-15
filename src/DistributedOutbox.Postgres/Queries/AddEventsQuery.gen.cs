@@ -188,6 +188,7 @@ namespace DistributedOutbox.Postgres.Queries
         /// Выполняет добавление строки в таблицу
         /// </summary>
         /// <param name="connection">Подключение к БД</param>
+        /// <param name="id">id_N</param>
         /// <param name="sequenceName">sequenceName_N</param>
         /// <param name="type">type_N</param>
         /// <param name="key">key_N</param>
@@ -198,11 +199,12 @@ namespace DistributedOutbox.Postgres.Queries
         /// <param name="status">status_N</param>
         /// <param name="cancellationToken">Токен отмены</param>
         /// <returns>Количество обновленных строк</returns>
-        public virtual async Task<int> AddAsync(DbConnection connection, string sequenceName, string type, string key, string targets, DateTime? date, string metadata, string payload, string status, CancellationToken cancellationToken)
+        public virtual async Task<int> AddAsync(DbConnection connection, long? id, string sequenceName, string type, string key, string targets, DateTime? date, string metadata, string payload, string status, CancellationToken cancellationToken)
         {
             using (DbCommand cmd = connection.CreateCommand())
             {
                 cmd.CommandText = GetQueryText();
+                AddParameter(cmd, NpgsqlDbType.Bigint, "@id_N", id);
                 AddParameter(cmd, NpgsqlDbType.Text, "@sequenceName_N", sequenceName);
                 AddParameter(cmd, NpgsqlDbType.Text, "@type_N", type);
                 AddParameter(cmd, NpgsqlDbType.Text, "@key_N", key);
@@ -233,6 +235,7 @@ namespace DistributedOutbox.Postgres.Queries
                 int index = 0;
                 foreach(PostgresOutboxEventRaw item in items)
                 {
+                    AddParameter(cmd, NpgsqlDbType.Bigint, string.Format("@id_{0}", index), item.Id);
                     AddParameter(cmd, NpgsqlDbType.Text, string.Format("@sequenceName_{0}", index), item.SequenceName);
                     AddParameter(cmd, NpgsqlDbType.Text, string.Format("@type_{0}", index), item.Type);
                     AddParameter(cmd, NpgsqlDbType.Text, string.Format("@key_{0}", index), item.Key);

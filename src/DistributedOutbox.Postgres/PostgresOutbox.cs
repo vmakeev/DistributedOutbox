@@ -50,10 +50,13 @@ namespace DistributedOutbox.Postgres
                             .Select(data => GetRawEventAsync(connection, data, cancellationToken))
                             .ToArray();
 
-            await _addEventsQuery.AddAsync(
-                connection: connection,
-                items: (await Task.WhenAll(itemTasks)).ToArray(),
-                cancellationToken: cancellationToken);
+            if (itemTasks.Any())
+            {
+                await _addEventsQuery.AddAsync(
+                    connection: connection,
+                    items: (await Task.WhenAll(itemTasks)).ToArray(),
+                    cancellationToken: cancellationToken);
+            }
         }
 
         private async Task<PostgresOutboxEventRaw> GetRawEventAsync(DbConnection connection,
@@ -66,7 +69,7 @@ namespace DistributedOutbox.Postgres
                 Date = data.EventDate,
                 Key = data.EventKey,
                 Targets = JsonSerializer.Serialize(_eventTargetsProvider.GetTargets(data.EventType)),
-                Metadata = JsonSerializer.Serialize(data.Metadata),
+                Metadata = JsonSerializer.Serialize(data.Metadata, typeof(IDictionary<string, string?>)),
                 Payload = JsonSerializer.Serialize(data.Payload),
                 Status = EventStatus.New.ToString("G"),
                 Type = data.EventType,
@@ -81,7 +84,7 @@ namespace DistributedOutbox.Postgres
         {
             return await _getNextEventIdQuery
                          .GetAsync(connection, cancellationToken)
-                         .SingleAsync(cancellationToken) ??
+                         .SingleOrDefaultAsync(cancellationToken) ??
                    throw new InvalidOperationException("Can not fetch next event id from database");
         }
     }

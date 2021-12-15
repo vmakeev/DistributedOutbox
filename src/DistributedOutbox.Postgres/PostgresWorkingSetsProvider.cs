@@ -126,6 +126,13 @@ namespace DistributedOutbox.Postgres
                                            .Select(postgresOutboxEvent => postgresOutboxEvent.ToPostgresOutboxEvent())
                                            .ToListAsync(cancellationToken: cancellationToken);
 
+                if (!parallelEvents.Any())
+                {
+                    await transaction.DisposeAsync();
+                    await connection.DisposeAsync();
+                    return null;
+                }
+
                 var parallelWorkingSet = new ParallelPostgresWorkingSet(parallelEvents, transaction);
                 return parallelWorkingSet;
             }
@@ -164,6 +171,13 @@ namespace DistributedOutbox.Postgres
                                              .GetAsync(connection, sequenceName, limit, cancellationToken)
                                              .Select(postgresOutboxEvent => postgresOutboxEvent.ToOrderedPostgresOutboxEvent())
                                              .ToListAsync(cancellationToken: cancellationToken);
+
+                if (!sequentialEvents.Any())
+                {
+                    await transaction.DisposeAsync();
+                    await connection.DisposeAsync();
+                    return null;
+                }
 
                 return new SequentialPostgresWorkingSet(sequentialEvents, transaction);
             }
@@ -250,7 +264,7 @@ namespace DistributedOutbox.Postgres
 
             foreach (var outboxEvent in workingSet.Events)
             {
-                var metadata = JsonSerializer.Serialize(outboxEvent.Metadata);
+                var metadata = JsonSerializer.Serialize(outboxEvent.Metadata, typeof(IDictionary<string, string?>));
                 var status = outboxEvent.Status.ToString("G");
 
                 await updateStatusWithMetadataQuery.UpdateAsync(
