@@ -24,14 +24,20 @@ namespace DistributedOutbox.Postgres.Tests
             PostgresOutbox outbox,
             Mock<IOutboxEventData> outboxEventDataMock)
         {
+            // Arrange
+            
             var actions = new List<Func<DbConnection, Task>>();
 
             unitOfWorkMock.Setup(uow => uow.Enqueue(It.IsAny<Func<DbConnection, Task>>()))
                           .Callback((Func<DbConnection, Task> func) => actions.Add(func))
                           .Returns(Task.CompletedTask);
 
+            // Act
+            
             await outbox.AddEventAsync(outboxEventDataMock.Object, CancellationToken.None);
 
+            // Assert
+            
             actions.Should().HaveCount(1);
         }
 
@@ -41,6 +47,8 @@ namespace DistributedOutbox.Postgres.Tests
             [Frozen] Mock<IDatabaseUnitOfWork> unitOfWorkMock,
             PostgresOutbox outbox)
         {
+            // Arrange
+            
             var actions = new List<Func<DbConnection, Task>>();
 
             unitOfWorkMock.Setup(uow => uow.Enqueue(It.IsAny<Func<DbConnection, Task>>()))
@@ -49,11 +57,15 @@ namespace DistributedOutbox.Postgres.Tests
 
             var outboxEvents = fixture.CreateMany<IOutboxEventData>().ToArray();
 
+            // Act
+            
             foreach (var outboxEventData in outboxEvents)
             {
                 await outbox.AddEventAsync(outboxEventData, CancellationToken.None);
             }
 
+            // Assert
+            
             actions.Should().HaveCount(outboxEvents.Length);
         }
 
@@ -63,14 +75,20 @@ namespace DistributedOutbox.Postgres.Tests
             PostgresOutbox outbox,
             Mock<IOutboxEventData> outboxEventDataMock)
         {
+            // Arrange
+            
             var actions = new List<Func<DbConnection, Task>>();
 
             unitOfWorkMock.Setup(uow => uow.Enqueue(It.IsAny<Func<DbConnection, Task>>()))
                           .Callback((Func<DbConnection, Task> func) => actions.Add(func))
                           .Returns(Task.CompletedTask);
 
+            // Act
+            
             await outbox.AddEventsAsync(new[] { outboxEventDataMock.Object }, CancellationToken.None);
 
+            // Assert
+            
             actions.Should().HaveCount(1);
         }
 
@@ -80,6 +98,8 @@ namespace DistributedOutbox.Postgres.Tests
             [Frozen] Mock<IDatabaseUnitOfWork> unitOfWorkMock,
             PostgresOutbox outbox)
         {
+            // Arrange
+            
             var actions = new List<Func<DbConnection, Task>>();
 
             unitOfWorkMock.Setup(uow => uow.Enqueue(It.IsAny<Func<DbConnection, Task>>()))
@@ -88,8 +108,12 @@ namespace DistributedOutbox.Postgres.Tests
 
             var outboxEvents = fixture.CreateMany<IOutboxEventData>().ToArray();
 
+            // Act
+            
             await outbox.AddEventsAsync(outboxEvents, CancellationToken.None);
 
+            // Assert
+            
             actions.Should().HaveCount(1);
         }
 
@@ -107,6 +131,8 @@ namespace DistributedOutbox.Postgres.Tests
             MockDbConnection dbConnectionMock,
             PostgresOutbox outbox)
         {
+            // Arrange
+            
             var lastId = 0L;
             dbConnectionMock.Mocks
                             .When(command => command.CommandText.Contains("nextval"))
@@ -133,6 +159,8 @@ namespace DistributedOutbox.Postgres.Tests
             eventTargetsProviderMock.Setup(provider => provider.GetTargets(It.IsAny<string>()))
                    .Returns(fixture.CreateMany<string>());
 
+            // Act
+            
             for (var i = 0; i < eventsCount; i++)
             {
                 var outboxEventDataMock = fixture.Create<Mock<IOutboxEventData>>();
@@ -146,6 +174,8 @@ namespace DistributedOutbox.Postgres.Tests
                 await action.Invoke(dbConnectionMock);
             }
 
+            // Assert
+            
             lastId.Should().Be(eventsCount);
             insertCallsCount.Should().Be(eventsCount);
             passedParametersCount.Should().Be(eventsCount * ParametersPerRowInsert);
@@ -167,6 +197,8 @@ namespace DistributedOutbox.Postgres.Tests
             MockDbConnection dbConnectionMock,
             PostgresOutbox outbox)
         {
+            // Arrange
+            
             var lastId = 0L;
             dbConnectionMock.Mocks
                             .When(command => command.CommandText.Contains("nextval"))
@@ -195,6 +227,8 @@ namespace DistributedOutbox.Postgres.Tests
 
             var eventPackLengths = new[] { pack1Length, pack2Length, pack3Length };
 
+            // Act
+            
             foreach (var packLength in eventPackLengths)
             {
                 var outboxEvents = new List<IOutboxEventData>();
@@ -215,6 +249,8 @@ namespace DistributedOutbox.Postgres.Tests
                 await action.Invoke(dbConnectionMock);
             }
 
+            // Assert
+            
             lastId.Should().Be(eventPackLengths.Sum());
             insertCallsCount.Should().Be(eventPackLengths.Count(length => length > 0));
             passedParametersCount.Should().Be(eventPackLengths.Sum() * ParametersPerRowInsert);

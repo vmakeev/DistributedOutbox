@@ -18,7 +18,12 @@ namespace DistributedOutbox.Postgres.Tests
             Mock<DbTransaction> transactionMock
         )
         {
+            // Act
+            
             var workingSet = new SequentialPostgresWorkingSet(outboxEvents, transactionMock.Object);
+            
+            // Assert
+            
             workingSet.Events.Should().BeEquivalentTo(outboxEvents, options => options.WithoutStrictOrdering());
             ((IWorkingSet)workingSet).Events.Should().BeEquivalentTo(outboxEvents, options => options.WithoutStrictOrdering());
 
@@ -33,13 +38,20 @@ namespace DistributedOutbox.Postgres.Tests
             Mock<DbTransaction> transactionMock
         )
         {
+            // Arrange
+            
             transactionMock
                 .Setup(transaction => transaction.CommitAsync(It.IsAny<CancellationToken>()))
                 .Returns(Task.CompletedTask)
                 .Verifiable();
 
+            // Act
+            
             var workingSet = new SequentialPostgresWorkingSet(outboxEvents, transactionMock.Object);
             await workingSet.CommitAsync(CancellationToken.None);
+            
+            // Assert
+            
             transactionMock.Verify(transaction => transaction.CommitAsync(It.IsAny<CancellationToken>()), Times.Once);
         }
 
@@ -49,15 +61,22 @@ namespace DistributedOutbox.Postgres.Tests
             Mock<DbTransaction> transactionMock
         )
         {
+            // Arrange
+            
             transactionMock
                 .Setup(transaction => transaction.CommitAsync(It.IsAny<CancellationToken>()))
                 .Returns(Task.CompletedTask)
                 .Verifiable();
 
+            // Act
+            
             var workingSet = new SequentialPostgresWorkingSet(outboxEvents, transactionMock.Object);
             await workingSet.CommitAsync(CancellationToken.None);
 
             var action = new Func<Task>(() => workingSet.CommitAsync(CancellationToken.None));
+            
+            // Assert
+            
             await action.Should().ThrowExactlyAsync<InvalidOperationException>();
 
             transactionMock.Verify(transaction => transaction.CommitAsync(It.IsAny<CancellationToken>()), Times.Once);
@@ -69,6 +88,8 @@ namespace DistributedOutbox.Postgres.Tests
             Mock<DbTransaction> transactionMock
         )
         {
+            // Arrange
+            
             transactionMock
                 .Setup(transaction => transaction.CommitAsync(It.IsAny<CancellationToken>()))
                 .Returns(Task.CompletedTask)
@@ -79,10 +100,15 @@ namespace DistributedOutbox.Postgres.Tests
                 .Returns(Task.CompletedTask)
                 .Verifiable();
 
+            // Act
+            
             var workingSet = new SequentialPostgresWorkingSet(outboxEvents, transactionMock.Object);
             await workingSet.RollbackAsync(CancellationToken.None);
 
             var action = new Func<Task>(() => workingSet.CommitAsync(CancellationToken.None));
+            
+            // Assert
+            
             await action.Should().ThrowExactlyAsync<InvalidOperationException>();
 
             transactionMock.Verify(transaction => transaction.CommitAsync(It.IsAny<CancellationToken>()), Times.Never);
@@ -95,6 +121,8 @@ namespace DistributedOutbox.Postgres.Tests
             Mock<DbTransaction> transactionMock
         )
         {
+            // Arrange
+            
             transactionMock
                 .Setup(transaction => transaction.CommitAsync(It.IsAny<CancellationToken>()))
                 .Returns(Task.CompletedTask)
@@ -105,9 +133,14 @@ namespace DistributedOutbox.Postgres.Tests
                 .Returns(new ValueTask())
                 .Verifiable();
 
+            // Act
+            
             var workingSet = new SequentialPostgresWorkingSet(outboxEvents, transactionMock.Object);
             await workingSet.DisposeAsync();
             var action = new Func<Task>(() => workingSet.CommitAsync(CancellationToken.None));
+            
+            // Assert
+            
             await action.Should()
                         .ThrowExactlyAsync<ObjectDisposedException>()
                         .Where(exception => exception.ObjectName == nameof(SequentialPostgresWorkingSet));
@@ -121,13 +154,20 @@ namespace DistributedOutbox.Postgres.Tests
             Mock<DbTransaction> transactionMock
         )
         {
+            // Arrange
+            
             transactionMock
                 .Setup(transaction => transaction.RollbackAsync(It.IsAny<CancellationToken>()))
                 .Returns(Task.CompletedTask)
                 .Verifiable();
 
+            // Act
+            
             var workingSet = new SequentialPostgresWorkingSet(outboxEvents, transactionMock.Object);
             await workingSet.RollbackAsync(CancellationToken.None);
+            
+            // Assert
+            
             transactionMock.Verify(transaction => transaction.RollbackAsync(It.IsAny<CancellationToken>()), Times.Once);
         }
 
@@ -137,6 +177,8 @@ namespace DistributedOutbox.Postgres.Tests
             Mock<DbTransaction> transactionMock
         )
         {
+            // Arrange
+            
             transactionMock
                 .Setup(transaction => transaction.CommitAsync(It.IsAny<CancellationToken>()))
                 .Returns(Task.CompletedTask)
@@ -147,10 +189,15 @@ namespace DistributedOutbox.Postgres.Tests
                 .Returns(Task.CompletedTask)
                 .Verifiable();
 
+            // Act
+            
             var workingSet = new SequentialPostgresWorkingSet(outboxEvents, transactionMock.Object);
             await workingSet.CommitAsync(CancellationToken.None);
 
             var action = new Func<Task>(() => workingSet.RollbackAsync(CancellationToken.None));
+            
+            // Assert
+            
             await action.Should().ThrowExactlyAsync<InvalidOperationException>();
 
             transactionMock.Verify(transaction => transaction.CommitAsync(It.IsAny<CancellationToken>()), Times.Once);
@@ -163,15 +210,22 @@ namespace DistributedOutbox.Postgres.Tests
             Mock<DbTransaction> transactionMock
         )
         {
+            // Arrange
+            
             transactionMock
                 .Setup(transaction => transaction.RollbackAsync(It.IsAny<CancellationToken>()))
                 .Returns(Task.CompletedTask)
                 .Verifiable();
 
+            // Act
+            
             var workingSet = new SequentialPostgresWorkingSet(outboxEvents, transactionMock.Object);
             await workingSet.RollbackAsync(CancellationToken.None);
 
             var action = new Func<Task>(() => workingSet.RollbackAsync(CancellationToken.None));
+            
+            // Assert
+            
             await action.Should().ThrowExactlyAsync<InvalidOperationException>();
 
             transactionMock.Verify(transaction => transaction.RollbackAsync(It.IsAny<CancellationToken>()), Times.Once);
@@ -183,6 +237,8 @@ namespace DistributedOutbox.Postgres.Tests
             Mock<DbTransaction> transactionMock
         )
         {
+            // Arrange
+            
             transactionMock
                 .Setup(transaction => transaction.RollbackAsync(It.IsAny<CancellationToken>()))
                 .Returns(Task.CompletedTask)
@@ -193,10 +249,15 @@ namespace DistributedOutbox.Postgres.Tests
                 .Returns(new ValueTask())
                 .Verifiable();
 
+            // Act
+            
             var workingSet = new SequentialPostgresWorkingSet(outboxEvents, transactionMock.Object);
             await workingSet.DisposeAsync();
 
             var action = new Func<Task>(() => workingSet.RollbackAsync(CancellationToken.None));
+            
+            // Assert
+            
             await action.Should()
                         .ThrowExactlyAsync<ObjectDisposedException>()
                         .Where(exception => exception.ObjectName == nameof(SequentialPostgresWorkingSet));
@@ -211,6 +272,8 @@ namespace DistributedOutbox.Postgres.Tests
             Mock<ReceiveConnectionDbTransaction> transactionMock
         )
         {
+            // Arrange
+            
             connectionMock
                 .Setup(connection => connection.DisposeAsync())
                 .Returns(new ValueTask())
@@ -225,9 +288,13 @@ namespace DistributedOutbox.Postgres.Tests
                 .Returns(new ValueTask())
                 .Verifiable();
 
+            // Act
+            
             var workingSet = new SequentialPostgresWorkingSet(outboxEvents, transactionMock.Object);
             await workingSet.DisposeAsync();
-
+            
+            // Assert
+            
             transactionMock.Verify(transaction => transaction.DisposeAsync(), Times.Once);
             connectionMock.Verify(connection => connection.DisposeAsync(), Times.Once);
         }
@@ -238,7 +305,10 @@ namespace DistributedOutbox.Postgres.Tests
             Mock<DbConnection> connectionMock,
             Mock<ReceiveConnectionDbTransaction> transactionMock
         )
+        
         {
+            // Arrange
+            
             connectionMock
                 .Setup(connection => connection.DisposeAsync())
                 .Returns(new ValueTask())
@@ -253,12 +323,16 @@ namespace DistributedOutbox.Postgres.Tests
                 .Returns(new ValueTask())
                 .Verifiable();
 
+            // Act
+            
             var workingSet = new SequentialPostgresWorkingSet(outboxEvents, transactionMock.Object);
 
             await workingSet.DisposeAsync();
             await workingSet.DisposeAsync();
             await workingSet.DisposeAsync();
             await workingSet.DisposeAsync();
+            
+            // Assert
 
             transactionMock.Verify(transaction => transaction.DisposeAsync(), Times.Once);
             connectionMock.Verify(connection => connection.DisposeAsync(), Times.Once);

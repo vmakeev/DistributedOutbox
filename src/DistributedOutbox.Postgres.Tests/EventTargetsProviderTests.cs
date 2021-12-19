@@ -15,8 +15,12 @@ namespace DistributedOutbox.Postgres.Tests
             string[] eventTargets,
             Mock<IEventTypeToTargetsMap> mapMock)
         {
+            // Arrange
+
             mapMock.Setup(map => map.EventType).Returns(eventType);
             mapMock.Setup(map => map.Targets).Returns(eventTargets);
+
+            // Act & Assert
 
             var provider = new EventTargetsProvider(new[] { mapMock.Object });
 
@@ -30,8 +34,12 @@ namespace DistributedOutbox.Postgres.Tests
             string[] eventTargets,
             Mock<IEventTypeToTargetsMap> mapMock)
         {
+            // Arrange
+
             mapMock.Setup(map => map.EventType).Returns(existingType);
             mapMock.Setup(map => map.Targets).Returns(eventTargets);
+
+            // Act & Assert
 
             var provider = new EventTargetsProvider(new[] { mapMock.Object });
 
@@ -46,11 +54,15 @@ namespace DistributedOutbox.Postgres.Tests
             Mock<IEventTypeToTargetsMap> mapMock1,
             Mock<IEventTypeToTargetsMap> mapMock2)
         {
+            // Arrange
+
             mapMock1.Setup(map => map.EventType).Returns(eventType);
             mapMock1.Setup(map => map.Targets).Returns(eventTargets1);
 
             mapMock2.Setup(map => map.EventType).Returns(eventType);
             mapMock2.Setup(map => map.Targets).Returns(eventTargets2);
+
+            // Act & Assert
 
             var provider = new EventTargetsProvider(new[] { mapMock1.Object, mapMock2.Object });
 
@@ -66,12 +78,16 @@ namespace DistributedOutbox.Postgres.Tests
             Mock<IEventTypeToTargetsMap> mapMock1,
             Mock<IEventTypeToTargetsMap> mapMock2)
         {
+            // Arrange
+
             mapMock1.Setup(map => map.EventType).Returns(eventType1);
             mapMock1.Setup(map => map.Targets).Returns(eventTargets1);
 
             mapMock2.Setup(map => map.EventType).Returns(eventType2);
             mapMock2.Setup(map => map.Targets).Returns(eventTargets2);
 
+            // Act & Assert
+            
             var provider = new EventTargetsProvider(new[] { mapMock1.Object, mapMock2.Object });
 
             provider.GetTargets(eventType1).Should().BeEquivalentTo(eventTargets1, options => options.WithoutStrictOrdering());
@@ -88,12 +104,16 @@ namespace DistributedOutbox.Postgres.Tests
             Mock<IEventTypeToTargetsMap> mapMock1,
             Mock<IEventTypeToTargetsMap> mapMock2)
         {
+            // Arrange
+
             mapMock1.Setup(map => map.EventType).Returns(eventType1);
             mapMock1.Setup(map => map.Targets).Returns(eventTargets1);
 
             mapMock2.Setup(map => map.EventType).Returns(eventType2);
             mapMock2.Setup(map => map.Targets).Returns(eventTargets2);
 
+            // Act & Assert
+            
             var provider = new EventTargetsProvider(new[] { mapMock1.Object, mapMock2.Object });
 
             provider.GetTargets(notExistingType).Should().BeEmpty();
@@ -106,6 +126,8 @@ namespace DistributedOutbox.Postgres.Tests
             Mock<IEventTypeToTargetsMap> mapMock1,
             Mock<IEventTypeToTargetsMap> mapMock2)
         {
+            // Arrange
+
             var eventTargets = fixture.CreateMany<string>(5).ToArray();
 
             mapMock1.Setup(map => map.EventType).Returns(eventType);
@@ -114,6 +136,8 @@ namespace DistributedOutbox.Postgres.Tests
             mapMock2.Setup(map => map.EventType).Returns(eventType);
             mapMock2.Setup(map => map.Targets).Returns(eventTargets.Skip(2));
 
+            // Act & Assert
+            
             var provider = new EventTargetsProvider(new[] { mapMock1.Object, mapMock2.Object });
 
             provider.GetTargets(eventType).Should().BeEquivalentTo(eventTargets, options => options.WithoutStrictOrdering());

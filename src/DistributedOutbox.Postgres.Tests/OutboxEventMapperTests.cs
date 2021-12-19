@@ -18,6 +18,8 @@ namespace DistributedOutbox.Postgres.Tests
             string[] eventTargets,
             EventStatus status)
         {
+            // Arrange
+
             rawEventMock.Setup(rawEvent => rawEvent.SequenceName).Returns(sequenceName);
 
             var metadata = new { foo = "bar", answer = "42" };
@@ -25,8 +27,12 @@ namespace DistributedOutbox.Postgres.Tests
             rawEventMock.Setup(rawEvent => rawEvent.Targets).Returns(JsonSerializer.Serialize(eventTargets));
             rawEventMock.Setup(rawEvent => rawEvent.Status).Returns(status.ToString("G"));
 
+            // Act
+            
             var outboxEvent = rawEventMock.Object.ToPostgresOutboxEvent();
 
+            // Assert
+            
             outboxEvent.Should().NotBeAssignableTo<IOrderedOutboxEvent>();
 
             outboxEvent.Id.Should().Be(default);
@@ -53,6 +59,8 @@ namespace DistributedOutbox.Postgres.Tests
             string[] eventTargets,
             EventStatus status)
         {
+            // Arrange
+
             rawEventMock.Setup(rawEvent => rawEvent.SequenceName).Returns(sequenceName);
 
             var metadata = new { foo = "bar", answer = "42" };
@@ -60,8 +68,12 @@ namespace DistributedOutbox.Postgres.Tests
             rawEventMock.Setup(rawEvent => rawEvent.Targets).Returns(JsonSerializer.Serialize(eventTargets));
             rawEventMock.Setup(rawEvent => rawEvent.Status).Returns(status.ToString("G"));
 
+            // Act
+            
             var outboxEvent = rawEventMock.Object.ToPostgresOutboxEvent();
 
+            // Assert
+            
             outboxEvent.Should().BeAssignableTo<IOrderedOutboxEvent>();
 
             ((IOrderedOutboxEvent)outboxEvent).SequenceName.Should().Be(sequenceName);
@@ -88,6 +100,8 @@ namespace DistributedOutbox.Postgres.Tests
             string[] eventTargets,
             EventStatus status)
         {
+            // Arrange
+
             rawEventMock.Setup(rawEvent => rawEvent.SequenceName).Returns((string?)null);
 
             var metadata = new { foo = "bar", answer = "42" };
@@ -96,6 +110,9 @@ namespace DistributedOutbox.Postgres.Tests
             rawEventMock.Setup(rawEvent => rawEvent.Status).Returns(status.ToString("G"));
 
             var action = new Action(() => rawEventMock.Object.ToOrderedPostgresOutboxEvent());
+            
+            // Act & assert
+            
             action.Should().ThrowExactly<ArgumentException>().WithParameterName("SequenceName");
         }
 
@@ -106,6 +123,8 @@ namespace DistributedOutbox.Postgres.Tests
             string[] eventTargets,
             EventStatus status)
         {
+            // Arrange
+
             rawEventMock.Setup(rawEvent => rawEvent.SequenceName).Returns(sequenceName);
 
             var metadata = new { foo = "bar", answer = "42" };
@@ -113,8 +132,12 @@ namespace DistributedOutbox.Postgres.Tests
             rawEventMock.Setup(rawEvent => rawEvent.Targets).Returns(JsonSerializer.Serialize(eventTargets));
             rawEventMock.Setup(rawEvent => rawEvent.Status).Returns(status.ToString("G"));
 
+            // Act
+            
             var outboxEvent = rawEventMock.Object.ToOrderedPostgresOutboxEvent();
 
+            // Assert
+            
             outboxEvent.Should().BeAssignableTo<IOrderedOutboxEvent>();
 
             outboxEvent.SequenceName.Should().Be(sequenceName);

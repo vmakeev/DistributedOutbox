@@ -26,6 +26,8 @@ namespace DistributedOutbox.Postgres.Tests
             MockDbConnection mockDbConnection,
             PostgresWorkingSetsProvider workingSetsProvider)
         {
+            // Arrange
+            
             // skip sql validation due to postgres dialect
             mockDbConnection.HasValidSqlServerCommandText = false;
 
@@ -86,8 +88,12 @@ namespace DistributedOutbox.Postgres.Tests
                 .Setup(provider => provider.GetDbConnectionAsync(It.IsAny<CancellationToken>()))
                 .ReturnsAsync(() => mockDbConnection);
 
+            // Act
+            
             var workingSets = await workingSetsProvider.AcquireWorkingSetsAsync(CancellationToken.None);
 
+            // Assert
+            
             workingSets.Should().HaveCount(2);
             workingSets.OfType<IParallelWorkingSet>().Should().HaveCount(1);
             workingSets.OfType<ISequentialWorkingSet>().Should().HaveCount(1);
@@ -137,6 +143,8 @@ namespace DistributedOutbox.Postgres.Tests
             MockDbConnection mockDbConnection,
             PostgresWorkingSetsProvider workingSetsProvider)
         {
+            // Arrange
+            
             var eventId = 0L;
 
             // skip sql validation due to postgres dialect
@@ -222,8 +230,12 @@ namespace DistributedOutbox.Postgres.Tests
                 .Setup(provider => provider.GetDbConnectionAsync(It.IsAny<CancellationToken>()))
                 .ReturnsAsync(() => mockDbConnection);
 
+            // Act
+            
             var workingSets = await workingSetsProvider.AcquireWorkingSetsAsync(CancellationToken.None);
 
+            // Assert
+            
             workingSets.Should().HaveCount(expectedParallelWorkingSetsCount + expectedSequentialWorkingSetsCount);
             workingSets.OfType<IParallelWorkingSet>().Should().HaveCount(expectedParallelWorkingSetsCount);
             workingSets.OfType<ISequentialWorkingSet>().Should().HaveCount(expectedSequentialWorkingSetsCount);
@@ -274,6 +286,8 @@ namespace DistributedOutbox.Postgres.Tests
             MockDbConnection mockDbConnection,
             PostgresWorkingSetsProvider workingSetsProvider)
         {
+            // Arrange
+            
             var eventId = 0L;
 
             // skip sql validation due to postgres dialect
@@ -357,8 +371,12 @@ namespace DistributedOutbox.Postgres.Tests
                 .Setup(provider => provider.GetDbConnectionAsync(It.IsAny<CancellationToken>()))
                 .ReturnsAsync(() => mockDbConnection);
 
+            // Act
+            
             var workingSets = await workingSetsProvider.AcquireWorkingSetsAsync(CancellationToken.None);
 
+            // Assert
+            
             workingSets.Should().HaveCount(2);
             workingSets.OfType<IParallelWorkingSet>().Should().HaveCount(1);
             workingSets.OfType<ISequentialWorkingSet>().Should().HaveCount(1);
@@ -410,6 +428,8 @@ namespace DistributedOutbox.Postgres.Tests
             MockDbConnection mockDbConnection,
             PostgresWorkingSetsProvider workingSetsProvider)
         {
+            // Arrange
+            
             var eventId = 0L;
 
             // skip sql validation due to postgres dialect
@@ -504,8 +524,12 @@ namespace DistributedOutbox.Postgres.Tests
                 .Setup(provider => provider.GetDbConnectionAsync(It.IsAny<CancellationToken>()))
                 .ReturnsAsync(() => mockDbConnection);
 
+            // Act
+            
             var workingSets = await workingSetsProvider.AcquireWorkingSetsAsync(CancellationToken.None);
 
+            // Assert
+            
             var expectedParallelSetsCount = 1;
             var expectedSequentialSetsCount = (int)Math.Ceiling((double)sequentialEventsLimit / perSequenceEventsCount);
 
@@ -560,6 +584,8 @@ namespace DistributedOutbox.Postgres.Tests
             MockDbConnection mockDbConnection,
             PostgresWorkingSetsProvider workingSetsProvider)
         {
+            // Arrange
+            
             var eventId = 0L;
 
             const int lockedSequenceIndex = 2;
@@ -659,8 +685,12 @@ namespace DistributedOutbox.Postgres.Tests
                 .Setup(provider => provider.GetDbConnectionAsync(It.IsAny<CancellationToken>()))
                 .ReturnsAsync(() => mockDbConnection);
 
+            // Act
+            
             var workingSets = await workingSetsProvider.AcquireWorkingSetsAsync(CancellationToken.None);
 
+            // Assert
+            
             sequencesCount.Should().BeGreaterThan(lockedSequenceIndex);
             lockedSequenceName.Should().NotBeNullOrEmpty();
 
@@ -698,6 +728,8 @@ namespace DistributedOutbox.Postgres.Tests
             Mock<IPostgresWorkingSet> postgresWorkingSetMock,
             PostgresWorkingSetsProvider workingSetsProvider)
         {
+            // Arrange
+            
             // skip sql validation due to postgres dialect
             mockDbConnection.HasValidSqlServerCommandText = false;
 
@@ -733,8 +765,12 @@ namespace DistributedOutbox.Postgres.Tests
                 .SetupGet(workingSet => workingSet.Events)
                 .Returns(fixture.CreateMany<IPostgresOutboxEvent>().ToArray());
 
+            // Act
+            
             await workingSetsProvider.ReleaseWorkingSetAsync(postgresWorkingSetMock.Object, true, CancellationToken.None);
 
+            // Assert
+            
             updateCounter.Should().Be(postgresWorkingSetMock.Object.Events.Count);
             postgresWorkingSetMock.Object.Status.Should().Be(WorkingSetStatus.Completed);
             postgresWorkingSetMock.Verify(workingSet => workingSet.CommitAsync(It.IsAny<CancellationToken>()), Times.Once);
@@ -749,6 +785,8 @@ namespace DistributedOutbox.Postgres.Tests
             Mock<IPostgresWorkingSet> postgresWorkingSetMock,
             PostgresWorkingSetsProvider workingSetsProvider)
         {
+            // Arrange
+            
             // skip sql validation due to postgres dialect
             mockDbConnection.HasValidSqlServerCommandText = false;
 
@@ -784,8 +822,12 @@ namespace DistributedOutbox.Postgres.Tests
                 .SetupGet(workingSet => workingSet.Events)
                 .Returns(fixture.CreateMany<IPostgresOutboxEvent>().ToArray());
 
+            // Act
+            
             await workingSetsProvider.ReleaseWorkingSetAsync(postgresWorkingSetMock.Object, false, CancellationToken.None);
 
+            // Assert
+            
             updateCounter.Should().Be(0);
             postgresWorkingSetMock.Object.Status.Should().Be(WorkingSetStatus.NotProcessed);
             postgresWorkingSetMock.Verify(workingSet => workingSet.CommitAsync(It.IsAny<CancellationToken>()), Times.Never);
@@ -800,6 +842,8 @@ namespace DistributedOutbox.Postgres.Tests
             Mock<IPostgresWorkingSet> postgresWorkingSetMock,
             PostgresWorkingSetsProvider workingSetsProvider)
         {
+            // Arrange
+            
             // skip sql validation due to postgres dialect
             mockDbConnection.HasValidSqlServerCommandText = false;
 
@@ -837,6 +881,8 @@ namespace DistributedOutbox.Postgres.Tests
 
             var action = new Func<Task>(() => workingSetsProvider.ReleaseWorkingSetAsync(postgresWorkingSetMock.Object, true, CancellationToken.None));
 
+            // Act & assert
+            
             await action.Should().ThrowExactlyAsync<SpecificException>();
 
             updateCounter.Should().Be(postgresWorkingSetMock.Object.Events.Count);
@@ -853,6 +899,8 @@ namespace DistributedOutbox.Postgres.Tests
             Mock<IPostgresWorkingSet> postgresWorkingSetMock,
             PostgresWorkingSetsProvider workingSetsProvider)
         {
+            // Arrange
+            
             // skip sql validation due to postgres dialect
             mockDbConnection.HasValidSqlServerCommandText = false;
 
@@ -885,6 +933,8 @@ namespace DistributedOutbox.Postgres.Tests
 
             var action = new Func<Task>(() => workingSetsProvider.ReleaseWorkingSetAsync(postgresWorkingSetMock.Object, true, CancellationToken.None));
 
+            // Act & assert
+            
             await action.Should().ThrowExactlyAsync<SpecificException>();
 
             updateCounter.Should().Be(0);
@@ -901,6 +951,8 @@ namespace DistributedOutbox.Postgres.Tests
             Mock<IPostgresWorkingSet> postgresWorkingSetMock,
             PostgresWorkingSetsProvider workingSetsProvider)
         {
+            // Arrange
+            
             // skip sql validation due to postgres dialect
             mockDbConnection.HasValidSqlServerCommandText = false;
 
@@ -938,6 +990,8 @@ namespace DistributedOutbox.Postgres.Tests
 
             var action = new Func<Task>(() => workingSetsProvider.ReleaseWorkingSetAsync(postgresWorkingSetMock.Object, false, CancellationToken.None));
 
+            // Act & assert
+            
             await action.Should().ThrowExactlyAsync<SpecificException>();
 
             updateCounter.Should().Be(0);
