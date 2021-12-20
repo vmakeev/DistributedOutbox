@@ -22,8 +22,10 @@ namespace DistributedOutbox.Kafka
         }
 
         /// <inheritdoc />
-        public async Task<IWorkingSet> ProcessAsync(IWorkingSet workingSet, CancellationToken cancellationToken)
+        public async Task<int> ProcessAsync(IWorkingSet workingSet, CancellationToken cancellationToken)
         {
+            var sentEventsCount = 0;
+
             foreach (var outboxEvent in workingSet.Events)
             {
                 try
@@ -38,6 +40,7 @@ namespace DistributedOutbox.Kafka
                     if (isProduced)
                     {
                         outboxEvent.MarkCompleted();
+                        sentEventsCount++;
                     }
                     else
                     {
@@ -50,12 +53,12 @@ namespace DistributedOutbox.Kafka
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, $"Can not publish event of type {outboxEvent.EventType}");
+                    _logger.LogError(ex, "Can not publish event of type {EventType} ({@Event})", outboxEvent.EventType, outboxEvent);
                     outboxEvent.MarkFailed($"Exception occurred: {ex}");
                 }
             }
 
-            return workingSet;
+            return sentEventsCount;
         }
     }
 }

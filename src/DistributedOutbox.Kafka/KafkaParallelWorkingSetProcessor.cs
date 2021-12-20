@@ -23,9 +23,9 @@ namespace DistributedOutbox.Kafka
         }
 
         /// <inheritdoc />
-        public async Task<IWorkingSet> ProcessAsync(IWorkingSet workingSet, CancellationToken cancellationToken)
+        public async Task<int> ProcessAsync(IWorkingSet workingSet, CancellationToken cancellationToken)
         {
-            var publishTasks = new List<Task>();
+            var publishTasks = new List<Task<EventStatus>>();
 
             foreach (var outboxEvent in workingSet.Events)
             {
@@ -34,10 +34,10 @@ namespace DistributedOutbox.Kafka
 
             await Task.WhenAll(publishTasks);
 
-            return workingSet;
+            return publishTasks.Count(task => task.Result is EventStatus.Sent);
         }
 
-        private async Task PublishEventAsync(IOutboxEvent outboxEvent, CancellationToken cancellationToken)
+        private async Task<EventStatus> PublishEventAsync(IOutboxEvent outboxEvent, CancellationToken cancellationToken)
         {
             try
             {
@@ -53,9 +53,11 @@ namespace DistributedOutbox.Kafka
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Can not publish event of type {outboxEvent.EventType}");
+                _logger.LogError(ex, "Can not publish event of type {EventType} ({@Event})", outboxEvent.EventType, outboxEvent);
                 outboxEvent.MarkFailed($"Exception occurred: {ex}");
             }
+
+            return outboxEvent.Status;
         }
     }
 }

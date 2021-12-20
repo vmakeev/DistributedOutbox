@@ -31,6 +31,8 @@ namespace DistributedOutbox.AspNetCore
             {
                 var tasksDictionary = StartWorkingSetsProcessing(workingSets, cancellationToken);
 
+                var totalSentEventsCount = 0;
+                
                 while (tasksDictionary.Any())
                 {
                     cancellationToken.ThrowIfCancellationRequested();
@@ -38,21 +40,18 @@ namespace DistributedOutbox.AspNetCore
                     // освобождаем отдельные рабочие наборы сразу по завершении обработки,
                     // чтобы не ждать пока будут обработаны все
                     var finishedTask = await Task.WhenAny(tasksDictionary.Keys);
-                    if (tasksDictionary.Remove(finishedTask, out var workingSet))
-                    {
-                        var isProcessed = finishedTask.IsCompletedSuccessfully;
-                        await _workingSetsProvider.ReleaseWorkingSetAsync(workingSet, isProcessed, cancellationToken);
-                    }
-                    else
+                    if (!tasksDictionary.Remove(finishedTask, out var workingSet))
                     {
                         throw new InvalidOperationException("Cannot find finished task in dictionary.");
                     }
-                }
 
-                var sentEventsCount = workingSets
-                                      .Where(workingSet => workingSet.Status == WorkingSetStatus.Completed)
-                                      .Sum(workingSet => workingSet.Events.Count(outboxEvent => outboxEvent.Status == EventStatus.Sent));
-                return sentEventsCount;
+                    var isProcessed = finishedTask.IsCompletedSuccessfully;
+                    await _workingSetsProvider.ReleaseWorkingSetAsync(workingSet, isProcessed, cancellationToken);
+
+                    totalSentEventsCount += finishedTask.Result;
+                }
+                
+                return totalSentEventsCount;
             }
             finally
             {
@@ -63,7 +62,7 @@ namespace DistributedOutbox.AspNetCore
             }
         }
 
-        private IDictionary<Task, IWorkingSet> StartWorkingSetsProcessing(IReadOnlyCollection<IWorkingSet> workingSets, CancellationToken cancellationToken)
+        private IDictionary<Task<int>, IWorkingSet> StartWorkingSetsProcessing(IReadOnlyCollection<IWorkingSet> workingSets, CancellationToken cancellationToken)
         {
             var sequentialSets = workingSets.Where(workingSet => workingSet is ISequentialWorkingSet);
             var parallelSets = workingSets.Where(workingSet => workingSet is not ISequentialWorkingSet);
@@ -88,8 +87,8 @@ namespace DistributedOutbox.AspNetCore
                         workingSet
                     ));
 
-            var tasksDictionary = new Dictionary<Task, IWorkingSet>();
-            foreach ((Task task, var workingSet) in parallelSetsTasks.Concat(sequentialSetsTasks))
+            var tasksDictionary = new Dictionary<Task<int>, IWorkingSet>();
+            foreach (var (task, workingSet) in parallelSetsTasks.Concat(sequentialSetsTasks))
             {
                 tasksDictionary.Add(task, workingSet);
             }

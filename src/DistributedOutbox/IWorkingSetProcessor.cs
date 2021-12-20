@@ -13,6 +13,7 @@ namespace DistributedOutbox
         /// </summary>
         /// <param name="workingSet">Рабочий набор</param>
         /// <param name="cancellationToken">Токен отмены</param>
-        Task<IWorkingSet> ProcessAsync(IWorkingSet workingSet, CancellationToken cancellationToken);
+        /// <returns>Количество успешно отправленных сообщений</returns>
+        Task<int> ProcessAsync(IWorkingSet workingSet, CancellationToken cancellationToken);
     }
 }

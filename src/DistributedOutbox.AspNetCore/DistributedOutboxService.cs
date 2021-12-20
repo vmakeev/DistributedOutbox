@@ -29,40 +29,35 @@ namespace DistributedOutbox.AspNetCore
 
         /// <inheritdoc />
         [SuppressMessage("ReSharper", "MethodSupportsCancellation")]
-        protected override Task ExecuteAsync(CancellationToken stoppingToken)
+        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            return Task.Run(() => WorkingLoop(stoppingToken));
-        }
-
-        private async Task WorkingLoop(CancellationToken cancellationToken)
-        {
-            while (true)
+            while (!stoppingToken.IsCancellationRequested)
             {
                 try
                 {
-                    cancellationToken.ThrowIfCancellationRequested();
                     using var serviceScope = _serviceScopeFactory.CreateScope();
                     var outboxProcessor = serviceScope.ServiceProvider.GetRequiredService<IOutboxProcessor>();
-                    var sentEventsCount = await outboxProcessor.ProcessAsync(cancellationToken);
+                    var sentEventsCount = await outboxProcessor.ProcessAsync(stoppingToken);
 
-                    _logger.LogTrace($"{sentEventsCount} events produced");
+                    _logger.LogTrace("{SentEventsCount} events produced", sentEventsCount);
 
                     if (sentEventsCount == 0)
                     {
-                        await Task.Delay(_options.Value.NoEventsPublishedDelay, cancellationToken);
+                        await Task.Delay(_options.Value.NoEventsPublishedDelay, stoppingToken);
                     }
                 }
                 catch (OperationCanceledException)
                 {
-                    _logger.LogInformation($"{nameof(DistributedOutboxService)} stopping due to stoppingToken has been canceled");
-                    return;
+                    break;
                 }
                 catch (Exception ex)
                 {
                     _logger.LogError(ex, "An error occurred while processing");
-                    await Task.Delay(_options.Value.ErrorDelay, cancellationToken);
+                    await Task.Delay(_options.Value.ErrorDelay, stoppingToken);
                 }
             }
+
+            _logger.LogInformation(nameof(DistributedOutboxService) + " stopping due to stoppingToken has been canceled");
         }
     }
 }

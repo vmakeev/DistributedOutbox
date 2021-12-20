@@ -214,44 +214,40 @@ namespace DistributedOutbox.Postgres
 
         private async Task CommitWorkingSetAsync(IWorkingSet workingSet, CancellationToken cancellationToken)
         {
-            if (workingSet is IPostgresWorkingSet postgresWorkingSet)
-            {
-                try
-                {
-                    await StoreEvents(postgresWorkingSet, cancellationToken);
-                    await postgresWorkingSet.CommitAsync(cancellationToken);
-                    postgresWorkingSet.Status = WorkingSetStatus.Completed;
-                }
-                catch
-                {
-                    postgresWorkingSet.Status = WorkingSetStatus.Failed;
-                    throw;
-                }
-            }
-            else
+            if (workingSet is not IPostgresWorkingSet postgresWorkingSet)
             {
                 throw new ArgumentException($"This working set is not supported by {GetType().Name}", nameof(workingSet));
+            }
+
+            try
+            {
+                await StoreEvents(postgresWorkingSet, cancellationToken);
+                await postgresWorkingSet.CommitAsync(cancellationToken);
+                postgresWorkingSet.Status = WorkingSetStatus.Completed;
+            }
+            catch
+            {
+                postgresWorkingSet.Status = WorkingSetStatus.Failed;
+                throw;
             }
         }
 
         private async Task RollbackWorkingSetAsync(IWorkingSet workingSet, CancellationToken cancellationToken)
         {
-            if (workingSet is IPostgresWorkingSet postgresWorkingSet)
-            {
-                try
-                {
-                    await postgresWorkingSet.RollbackAsync(cancellationToken);
-                    postgresWorkingSet.Status = WorkingSetStatus.NotProcessed;
-                }
-                catch
-                {
-                    postgresWorkingSet.Status = WorkingSetStatus.Failed;
-                    throw;
-                }
-            }
-            else
+            if (workingSet is not IPostgresWorkingSet postgresWorkingSet)
             {
                 throw new ArgumentException($"This working set is not supported by {GetType().Name}", nameof(workingSet));
+            }
+
+            try
+            {
+                await postgresWorkingSet.RollbackAsync(cancellationToken);
+                postgresWorkingSet.Status = WorkingSetStatus.NotProcessed;
+            }
+            catch
+            {
+                postgresWorkingSet.Status = WorkingSetStatus.Failed;
+                throw;
             }
         }
 
