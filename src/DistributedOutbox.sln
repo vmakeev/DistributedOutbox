@@ -14,6 +14,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DistributedOutbox.Postgres.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DistributedOutbox.AspNetCore.Tests", "DistributedOutbox.AspNetCore.Tests\DistributedOutbox.AspNetCore.Tests.csproj", "{20F959F0-0197-419F-9061-22E00F75907F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DistributedOutbox.Postgres.EfCore", "DistributedOutbox.Postgres.EfCore\DistributedOutbox.Postgres.EfCore.csproj", "{9B8560D5-79D1-4C68-A709-E7175D705C99}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -44,6 +46,10 @@ Global
 		{20F959F0-0197-419F-9061-22E00F75907F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{20F959F0-0197-419F-9061-22E00F75907F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{20F959F0-0197-419F-9061-22E00F75907F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9B8560D5-79D1-4C68-A709-E7175D705C99}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9B8560D5-79D1-4C68-A709-E7175D705C99}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9B8560D5-79D1-4C68-A709-E7175D705C99}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9B8560D5-79D1-4C68-A709-E7175D705C99}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{79155A67-56C3-4D6A-9DC9-43ADA443A82B} = {F483994C-1A30-431E-9012-E10647EDCC4A}

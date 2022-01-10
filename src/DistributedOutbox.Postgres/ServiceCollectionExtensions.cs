@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using DistributedOutbox.Postgres.EFIntegration;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace DistributedOutbox.Postgres
@@ -17,15 +15,17 @@ namespace DistributedOutbox.Postgres
         /// </summary>
         /// <param name="services"><see cref="IServiceCollection"/></param>
         /// <param name="configure">Конфигурация БД</param>
-        /// <typeparam name="TDbContext">Используемый <see cref="DbContext"/></typeparam>
+        /// <typeparam name="TConnectionProvider">Источник информации о строке подключения к БД</typeparam>
+        /// <typeparam name="TUnitOfWork">Используемый для хранения событий до коммита транзакции UnitOfWork</typeparam>
         /// <returns></returns>
-        public static IServiceCollection UsePostgresOutboxStorage<TDbContext>(this IServiceCollection services, Action<PostgresWorkingSetOptions> configure)
-            where TDbContext : DbContext
+        public static IServiceCollection UsePostgresOutboxStorage<TConnectionProvider, TUnitOfWork>(this IServiceCollection services, Action<PostgresWorkingSetOptions> configure) 
+            where TConnectionProvider : class, IPostgresOutboxConnectionProvider
+            where TUnitOfWork : class, IDatabaseUnitOfWork
         {
             services.Configure<PostgresWorkingSetOptions>(configure);
-            services.AddScoped<IPostgresOutboxConnectionProvider, DbContextConnectionProvider<TDbContext>>();
+            services.AddScoped<IPostgresOutboxConnectionProvider, TConnectionProvider>();
             services.AddScoped<IWorkingSetsProvider, PostgresWorkingSetsProvider>();
-            services.AddScoped<IDatabaseUnitOfWork, DbContextAttachedDatabaseUnitOfWork<TDbContext>>();
+            services.AddScoped<IDatabaseUnitOfWork, TUnitOfWork>();
             services.AddScoped<IOutbox, PostgresOutbox>();
 
             services.AddSingleton<IEventTargetsProvider, EventTargetsProvider>();

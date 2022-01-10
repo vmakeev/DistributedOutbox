@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
 
-namespace DistributedOutbox.Postgres.EFIntegration
+namespace DistributedOutbox.Postgres.EfCore
 {
     /// <summary>
     /// Поставщик соединений с БД, получающий строку подключения из <typeparamref name="TDbContext"/>
@@ -26,7 +26,16 @@ namespace DistributedOutbox.Postgres.EFIntegration
             var connectionString = _innerContext.Database.GetConnectionString();
 
             var connection = new NpgsqlConnection(connectionString);
-            await connection.OpenAsync(cancellationToken);
+
+            try
+            {
+                await connection.OpenAsync(cancellationToken);
+            }
+            catch
+            {
+                await connection.DisposeAsync();
+                throw;
+            }
 
             return connection;
         }

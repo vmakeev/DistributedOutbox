@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -29,29 +28,20 @@ namespace DistributedOutbox.AspNetCore
 
             try
             {
-                var tasksDictionary = StartWorkingSetsProcessing(workingSets, cancellationToken);
+                var sequentialSets = workingSets.Where(workingSet => workingSet is ISequentialWorkingSet);
+                var parallelSets = workingSets.Where(workingSet => workingSet is not ISequentialWorkingSet);
 
-                var totalSentEventsCount = 0;
-                
-                while (tasksDictionary.Any())
-                {
-                    cancellationToken.ThrowIfCancellationRequested();
+                var parallelSetsTasks = ProcessWorkingSets(
+                    workingSetProcessor: _parallelWorkingSetProcessor,
+                    workingSets: parallelSets,
+                    cancellationToken: cancellationToken);
 
-                    // освобождаем отдельные рабочие наборы сразу по завершении обработки,
-                    // чтобы не ждать пока будут обработаны все
-                    var finishedTask = await Task.WhenAny(tasksDictionary.Keys);
-                    if (!tasksDictionary.Remove(finishedTask, out var workingSet))
-                    {
-                        throw new InvalidOperationException("Cannot find finished task in dictionary.");
-                    }
+                var sequentialSetsTasks = ProcessWorkingSets(
+                    workingSetProcessor: _sequentialWorkingSetProcessor,
+                    workingSets: sequentialSets,
+                    cancellationToken: cancellationToken);
 
-                    var isProcessed = finishedTask.IsCompletedSuccessfully;
-                    await _workingSetsProvider.ReleaseWorkingSetAsync(workingSet, isProcessed, cancellationToken);
-
-                    totalSentEventsCount += finishedTask.Result;
-                }
-                
-                return totalSentEventsCount;
+                return (await Task.WhenAll(parallelSetsTasks.Concat(sequentialSetsTasks))).Sum();
             }
             finally
             {
@@ -62,38 +52,24 @@ namespace DistributedOutbox.AspNetCore
             }
         }
 
-        private IDictionary<Task<int>, IWorkingSet> StartWorkingSetsProcessing(IReadOnlyCollection<IWorkingSet> workingSets, CancellationToken cancellationToken)
+        private IEnumerable<Task<int>> ProcessWorkingSets(IWorkingSetProcessor workingSetProcessor, IEnumerable<IWorkingSet> workingSets, CancellationToken cancellationToken)
         {
-            var sequentialSets = workingSets.Where(workingSet => workingSet is ISequentialWorkingSet);
-            var parallelSets = workingSets.Where(workingSet => workingSet is not ISequentialWorkingSet);
-
-            var parallelSetsTasks = parallelSets
+            return workingSets
                 .Select(
-                    workingSet =>
-                    (
-                        _parallelWorkingSetProcessor.ProcessAsync(
-                            workingSet,
-                            cancellationToken),
-                        workingSet
-                    ));
-
-            var sequentialSetsTasks = sequentialSets
-                .Select(
-                    workingSet =>
-                    (
-                        _sequentialWorkingSetProcessor.ProcessAsync(
-                            workingSet,
-                            cancellationToken),
-                        workingSet
-                    ));
-
-            var tasksDictionary = new Dictionary<Task<int>, IWorkingSet>();
-            foreach (var (task, workingSet) in parallelSetsTasks.Concat(sequentialSetsTasks))
-            {
-                tasksDictionary.Add(task, workingSet);
-            }
-
-            return tasksDictionary;
+                    parallelSet =>
+                        workingSetProcessor.ProcessAsync(parallelSet, cancellationToken)
+                                           .ContinueWith(
+                                               async task =>
+                                               {
+                                                   await _workingSetsProvider.ReleaseWorkingSetAsync(
+                                                       workingSet: parallelSet,
+                                                       isProcessed: task.IsCompletedSuccessfully,
+                                                       cancellationToken: cancellationToken);
+                                                   return task.GetAwaiter().GetResult();
+                                               },
+                                               cancellationToken)
+                                           .Unwrap()
+                );
         }
     }
 }

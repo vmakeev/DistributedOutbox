@@ -5,7 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 
-namespace DistributedOutbox.Postgres.EFIntegration
+namespace DistributedOutbox.Postgres.EfCore
 {
     /// <summary>
     /// Unit of work, работающий при сохранении данных в <typeparamref name="TDbContext"/>
@@ -75,6 +75,7 @@ namespace DistributedOutbox.Postgres.EFIntegration
                 EnsureHasTransactionInProgress();
                 _actions.Clear();
                 await _activeTransaction!.DisposeAsync();
+                _activeTransaction = null;
             }
             finally
             {
@@ -129,7 +130,6 @@ namespace DistributedOutbox.Postgres.EFIntegration
 
             try
             {
-                _activeTransactionAccessSemaphore.Release();
                 if (_activeTransaction is not null)
                 {
                     await _activeTransaction.DisposeAsync();

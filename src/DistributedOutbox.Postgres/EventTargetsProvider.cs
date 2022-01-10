@@ -6,30 +6,34 @@ namespace DistributedOutbox.Postgres
     /// <inheritdoc />
     internal sealed class EventTargetsProvider : IEventTargetsProvider
     {
-        private readonly Dictionary<string, List<string>> _dictionary = new();
+        private readonly Dictionary<string, List<string>> _eventTargetsMaps = new();
 
         public EventTargetsProvider(IEnumerable<IEventTypeToTargetsMap> maps)
         {
+            var tempMaps = new Dictionary<string, IEnumerable<string>>();
+
             foreach (var map in maps)
             {
-                if (_dictionary.ContainsKey(map.EventType))
+                if (tempMaps.ContainsKey(map.EventType))
                 {
-                    _dictionary[map.EventType] = _dictionary[map.EventType]
-                                                 .Concat(map.Targets)
-                                                 .Distinct()
-                                                 .ToList();
+                    tempMaps[map.EventType] = tempMaps[map.EventType].Concat(map.Targets);
                 }
                 else
                 {
-                    _dictionary[map.EventType] = map.Targets.ToList();
+                    tempMaps[map.EventType] = map.Targets;
                 }
+            }
+
+            foreach (var key in tempMaps.Keys)
+            {
+                _eventTargetsMaps[key] = tempMaps[key].Distinct().ToList();
             }
         }
 
         /// <inheritdoc />
         public IEnumerable<string> GetTargets(string eventType)
         {
-            if (!_dictionary.TryGetValue(eventType, out var targets))
+            if (!_eventTargetsMaps.TryGetValue(eventType, out var targets))
             {
                 return Enumerable.Empty<string>();
             }

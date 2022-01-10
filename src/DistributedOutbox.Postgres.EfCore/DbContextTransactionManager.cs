@@ -9,7 +9,7 @@ using System.Transactions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 
-namespace DistributedOutbox.Postgres.EFIntegration
+namespace DistributedOutbox.Postgres.EfCore
 {
     /// <summary>
     /// Обработчик транзакции, получающий её из активного DbContext

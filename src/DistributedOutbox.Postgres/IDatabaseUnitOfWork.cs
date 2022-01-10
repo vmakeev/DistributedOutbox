@@ -10,7 +10,7 @@ namespace DistributedOutbox.Postgres
     /// <remarks>
     /// Позволяет выполнять отложенное сохранение событий в outbox
     /// </remarks>
-    internal interface IDatabaseUnitOfWork : IAsyncDisposable
+    public interface IDatabaseUnitOfWork : IAsyncDisposable
     {
         /// <summary>
         /// Добавляет действие <paramref name="action"/> в очередь на исполнение
