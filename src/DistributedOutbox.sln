@@ -1,0 +1,58 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DistributedOutbox", "DistributedOutbox\DistributedOutbox.csproj", "{67D0E31B-0E5A-4172-B8E8-44A43BB75FBD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DistributedOutbox.Postgres", "DistributedOutbox.Postgres\DistributedOutbox.Postgres.csproj", "{8B61EFD4-E50B-4AF5-A475-4E0EE5452CF2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DistributedOutbox.AspNetCore", "DistributedOutbox.AspNetCore\DistributedOutbox.AspNetCore.csproj", "{FDD3ED48-9ABE-4A0D-A1CB-E2DF3C72EE43}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DistributedOutbox.Kafka", "DistributedOutbox.Kafka\DistributedOutbox.Kafka.csproj", "{799AFCFF-EB6C-4F02-9700-B2752DBDF189}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{F483994C-1A30-431E-9012-E10647EDCC4A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DistributedOutbox.Postgres.Tests", "DistributedOutbox.Postgres.Tests\DistributedOutbox.Postgres.Tests.csproj", "{79155A67-56C3-4D6A-9DC9-43ADA443A82B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DistributedOutbox.AspNetCore.Tests", "DistributedOutbox.AspNetCore.Tests\DistributedOutbox.AspNetCore.Tests.csproj", "{20F959F0-0197-419F-9061-22E00F75907F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DistributedOutbox.Postgres.EfCore", "DistributedOutbox.Postgres.EfCore\DistributedOutbox.Postgres.EfCore.csproj", "{9B8560D5-79D1-4C68-A709-E7175D705C99}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{67D0E31B-0E5A-4172-B8E8-44A43BB75FBD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{67D0E31B-0E5A-4172-B8E8-44A43BB75FBD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{67D0E31B-0E5A-4172-B8E8-44A43BB75FBD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{67D0E31B-0E5A-4172-B8E8-44A43BB75FBD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8B61EFD4-E50B-4AF5-A475-4E0EE5452CF2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8B61EFD4-E50B-4AF5-A475-4E0EE5452CF2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8B61EFD4-E50B-4AF5-A475-4E0EE5452CF2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8B61EFD4-E50B-4AF5-A475-4E0EE5452CF2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FDD3ED48-9ABE-4A0D-A1CB-E2DF3C72EE43}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FDD3ED48-9ABE-4A0D-A1CB-E2DF3C72EE43}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FDD3ED48-9ABE-4A0D-A1CB-E2DF3C72EE43}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FDD3ED48-9ABE-4A0D-A1CB-E2DF3C72EE43}.Release|Any CPU.Build.0 = Release|Any CPU
+		{799AFCFF-EB6C-4F02-9700-B2752DBDF189}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{799AFCFF-EB6C-4F02-9700-B2752DBDF189}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{799AFCFF-EB6C-4F02-9700-B2752DBDF189}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{799AFCFF-EB6C-4F02-9700-B2752DBDF189}.Release|Any CPU.Build.0 = Release|Any CPU
+		{79155A67-56C3-4D6A-9DC9-43ADA443A82B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{79155A67-56C3-4D6A-9DC9-43ADA443A82B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{79155A67-56C3-4D6A-9DC9-43ADA443A82B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{79155A67-56C3-4D6A-9DC9-43ADA443A82B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{20F959F0-0197-419F-9061-22E00F75907F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{20F959F0-0197-419F-9061-22E00F75907F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{20F959F0-0197-419F-9061-22E00F75907F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{20F959F0-0197-419F-9061-22E00F75907F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9B8560D5-79D1-4C68-A709-E7175D705C99}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9B8560D5-79D1-4C68-A709-E7175D705C99}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9B8560D5-79D1-4C68-A709-E7175D705C99}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9B8560D5-79D1-4C68-A709-E7175D705C99}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{79155A67-56C3-4D6A-9DC9-43ADA443A82B} = {F483994C-1A30-431E-9012-E10647EDCC4A}
+		{20F959F0-0197-419F-9061-22E00F75907F} = {F483994C-1A30-431E-9012-E10647EDCC4A}
+	EndGlobalSection
+EndGlobal
