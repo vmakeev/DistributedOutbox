@@ -12,7 +12,7 @@ namespace DistributedOutbox.Kafka
     {
         private readonly IOptions<KafkaProducerOptions> _options;
         private readonly IEnumerable<IKafkaMessagePreprocessor> _messagePreprocessors;
-        private readonly IProducer<string, byte[]> _eventProducer;
+        private readonly Lazy<IProducer<string, byte[]>> _eventProducerFactory;
 
         public KafkaEventProducer(IOptions<KafkaProducerOptions> options, IEnumerable<IKafkaMessagePreprocessor> messagePreprocessors)
         {
@@ -23,8 +23,9 @@ namespace DistributedOutbox.Kafka
                 throw new ArgumentException($"{nameof(KafkaProducerOptions.ProducerConfig)} must be specified.");
             }
 
-            var builder = new ProducerBuilder<string, byte[]>(options.Value.ProducerConfig);
-            _eventProducer = builder.Build();
+            _eventProducerFactory = new Lazy<IProducer<string, byte[]>>(
+                () => new ProducerBuilder<string, byte[]>(_options.Value.ProducerConfig).Build(),
+                LazyThreadSafetyMode.ExecutionAndPublication);
         }
 
         /// <inheritdoc />
@@ -42,13 +43,16 @@ namespace DistributedOutbox.Kafka
                 await preprocessor.Preprocess(message, outboxEvent, cancellationToken);
             }
 
-            await _eventProducer.ProduceAsync(topic, message, cancellationToken);
+            await _eventProducerFactory.Value.ProduceAsync(topic, message, cancellationToken);
         }
 
         /// <inheritdoc />
         public void Dispose()
         {
-            _eventProducer.Dispose();
+            if (_eventProducerFactory.IsValueCreated)
+            {
+                _eventProducerFactory.Value.Dispose();
+            }
         }
     }
 }
